@@ -32,6 +32,7 @@ eval `/sbin/blkid -o export /dev/${DEVICE}`
 DIR=`mktemp -d`
 systemd-mount -o ro --automount=yes --collect /dev/${DEVICE} ${DIR} 
 #The magic happens here
+curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copie des fichiers USB en cours..."] }'   "http://${HOST}:${PORT}/api/printer/command"
 shopt -s nocaseglob
 echo "got here"
 for file in ${DIR}/*.{gcode,gc}
@@ -44,4 +45,4 @@ done
 #cleanup  
 systemd-umount ${DIR}
 rmdir ${DIR}
-curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copy Complete"] }'   "http://${HOST}:${PORT}/api/printer/command"
+curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copie des fichiers USB terminee"] }'   "http://${HOST}:${PORT}/api/printer/command"
