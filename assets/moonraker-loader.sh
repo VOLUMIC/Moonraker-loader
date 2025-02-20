@@ -25,16 +25,15 @@ if [ -n "$device_is_mounted" ]; then
    exit 1
 fi
 
-
 # pull in useful variables from vol_id
 eval `/sbin/blkid -o export /dev/${DEVICE}`
 
 DIR=`mktemp -d`
 systemd-mount -o ro --automount=yes --collect /dev/${DEVICE} ${DIR} 
+
 #The magic happens here
-curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copie des fichiers USB en cours..."] }'   "http://${HOST}:${PORT}/api/printer/command"
 shopt -s nocaseglob
-echo "got here"
+curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copie des fichiers USB en cours..."] }'   "http://${HOST}:${PORT}/api/printer/command"
 for file in ${DIR}/*.{gcode,gc}
 do
     echo "${file} pretest"
@@ -42,7 +41,7 @@ do
     echo "uploading ${file}"
     curl -F "file=@${file}" -F "root"="gcodes" "http://${HOST}:${PORT}/server/files/upload"
 done
-#cleanup  
+cleanup
 systemd-umount ${DIR}
 rmdir ${DIR}
 curl --header "Content-Type: application/json"   --request POST --data '{"commands":["M117 Copie des fichiers USB terminee"] }'   "http://${HOST}:${PORT}/api/printer/command"
